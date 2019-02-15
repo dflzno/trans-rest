@@ -1,10 +1,11 @@
 package api.transfer;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public interface TransferAction {
 
-    Transfer execute(String senderAccountId, String recipientAccountId, BigDecimal amount);
+    TransferResult execute(String senderAccountId, String recipientAccountId, BigDecimal amount);
 
-    Transfer findById(String transferId);
+    Optional<Transfer> findById(String transferId);
 }
