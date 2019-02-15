@@ -1,4 +1,6 @@
 package api.account;
 
-public class NotEnoughFundsException extends Exception {
+import api.ApiException;
+
+public class NotEnoughFundsException extends ApiException {
 }
