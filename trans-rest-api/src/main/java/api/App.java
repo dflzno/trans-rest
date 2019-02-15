@@ -1,4 +1,4 @@
-package transrestapi;
+package api;
 
 import io.javalin.Javalin;
 
