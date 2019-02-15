@@ -24,7 +24,7 @@ public class TransferService implements TransferAction {
     }
 
     @Override
-    public TransferResult execute(final String senderAccountId, final String recipientAccountId, @NonNull final BigDecimal amount) {
+    public synchronized TransferResult execute(final String senderAccountId, final String recipientAccountId, @NonNull final BigDecimal amount) {
 
         final Optional<Account> wantedSenderAccount = accountService.getById(senderAccountId);
         final Optional<Account> wantedRecipientAccount = accountService.getById(recipientAccountId);
@@ -35,10 +35,10 @@ public class TransferService implements TransferAction {
 
         try {
             wantedSenderAccount.get().debit(amount);
+            wantedRecipientAccount.get().credit(amount);
         } catch (ApiException e) {
             return saveTransfer(buildFailedTransferResult(senderAccountId, recipientAccountId, amount, e));
         }
-        wantedRecipientAccount.get().credit(amount);
 
         return saveTransfer(TransferResult.builder()
                 .transfer(new Transfer(senderAccountId, recipientAccountId, amount, SUCCESSFUL))
@@ -53,7 +53,7 @@ public class TransferService implements TransferAction {
     private TransferResult buildFailedTransferResult(final String senderAccountId, final String recipientAccountId, final BigDecimal amount, final ApiException exception) {
         return TransferResult.builder()
                 .transfer(new Transfer(senderAccountId, recipientAccountId, amount, FAILED))
-                .exception(exception)
+                .error(exception)
                 .build();
     }
 

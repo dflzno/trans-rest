@@ -16,7 +16,7 @@ public class AccountServiceTest {
     private AccountService testSubject = new AccountService(new AccountRepository());
 
     @Before
-    public void saveAnAccount() {
+    public void saveAnAccount() throws ApiException {
         testAccount = new Account(new BigDecimal("2000"));
         testSubject.save(testAccount);
     }

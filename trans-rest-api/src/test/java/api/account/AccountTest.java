@@ -1,5 +1,6 @@
 package api.account;
 
+import api.ApiException;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -9,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AccountTest {
 
     @Test
-    public void shouldGenerateAnAccountIdentifier() {
+    public void shouldGenerateAnAccountIdentifier() throws ApiException {
         // given
         BigDecimal initialBalance = BigDecimal.ZERO;
 
@@ -20,8 +21,20 @@ public class AccountTest {
         assertThat(a.getAccountNumber()).isNotBlank();
     }
 
+    @Test(expected = ApiException.class)
+    public void shouldNotAllowToCreateAnAccountWithNegativeBalance() throws ApiException {
+        // given
+        BigDecimal initialBalance = new BigDecimal("-100");
+
+        // when
+        Account a = new Account(initialBalance);
+
+        // then
+        // addressed in test expectation
+    }
+
     @Test
-    public void shouldSuccessfullyCreditTheAccount() {
+    public void shouldSuccessfullyCreditTheAccount() throws ApiException {
         // given
         Account a = new Account(new BigDecimal(1000));
 
@@ -32,8 +45,8 @@ public class AccountTest {
         assertThat(a.getBalance()).isEqualTo(new BigDecimal(1500));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldNotAllowCreditingNegativeValues() {
+    @Test(expected = ApiException.class)
+    public void shouldNotAllowCreditingNegativeValues() throws ApiException {
         // given
         Account a = new Account(BigDecimal.ZERO);
 
@@ -45,7 +58,7 @@ public class AccountTest {
     }
 
     @Test
-    public void shouldSuccessfullyDebitFromTheAccount() throws NotEnoughFundsException {
+    public void shouldSuccessfullyDebitFromTheAccount() throws ApiException {
         // given
         Account a = new Account(new BigDecimal("1000"));
 
@@ -56,8 +69,8 @@ public class AccountTest {
         assertThat(a.getBalance()).isEqualTo(new BigDecimal("200"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldNotAllowDebitingNegativeValues() throws NotEnoughFundsException {
+    @Test(expected = ApiException.class)
+    public void shouldNotAllowDebitingNegativeValues() throws ApiException {
         // given
         Account a = new Account(BigDecimal.ZERO);
 
@@ -69,7 +82,7 @@ public class AccountTest {
     }
 
     @Test(expected = NotEnoughFundsException.class)
-    public void shouldNotAllowToLeaveANegativeBalance() throws NotEnoughFundsException {
+    public void shouldNotAllowToLeaveANegativeBalance() throws ApiException {
         // given
         Account a = new Account(new BigDecimal(100));
 

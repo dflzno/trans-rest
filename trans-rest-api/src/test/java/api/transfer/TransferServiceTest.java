@@ -1,5 +1,6 @@
 package api.transfer;
 
+import api.ApiException;
 import api.account.Account;
 import api.account.AccountNotFoundException;
 import api.account.AccountService;
@@ -28,7 +29,7 @@ public class TransferServiceTest {
     private TransferService testSubject;
 
     @Before
-    public void setUp() {
+    public void setUp() throws ApiException {
         when(accountService.getById("sender")).thenReturn(Optional.of(new Account(new BigDecimal("2500"))));
         when(accountService.getById("recipient")).thenReturn(Optional.of(new Account(new BigDecimal("120"))));
 
@@ -55,7 +56,7 @@ public class TransferServiceTest {
         final TransferResult result = testSubject.execute("sender", "recipient", new BigDecimal("350"));
 
         // then
-        assertThat(result.getException()).isEmpty();
+        assertThat(result.getError()).isEmpty();
         assertThat(result.getTransfer().getStatus()).isEqualByComparingTo(SUCCESSFUL);
         assertBasicTransferAttributes(result.getTransfer());
     }
@@ -66,8 +67,8 @@ public class TransferServiceTest {
         final TransferResult result = testSubject.execute("fakeSender", "recipient", new BigDecimal("350"));
 
         // then
-        assertThat(result.getException()).isPresent();
-        assertThat(result.getException().get()).isInstanceOf(AccountNotFoundException.class);
+        assertThat(result.getError()).isPresent();
+        assertThat(result.getError().get()).isInstanceOf(AccountNotFoundException.class);
         assertThat(result.getTransfer().getStatus()).isEqualByComparingTo(FAILED);
         assertBasicTransferAttributes(result.getTransfer());
     }
@@ -78,8 +79,8 @@ public class TransferServiceTest {
         final TransferResult result = testSubject.execute("sender", "fakeRecipient", new BigDecimal("350"));
 
         // then
-        assertThat(result.getException()).isPresent();
-        assertThat(result.getException().get()).isInstanceOf(AccountNotFoundException.class);
+        assertThat(result.getError()).isPresent();
+        assertThat(result.getError().get()).isInstanceOf(AccountNotFoundException.class);
         assertThat(result.getTransfer().getStatus()).isEqualByComparingTo(FAILED);
         assertBasicTransferAttributes(result.getTransfer());
     }
@@ -90,8 +91,8 @@ public class TransferServiceTest {
         final TransferResult result = testSubject.execute("sender", "recipient", new BigDecimal("4000"));
 
         // then
-        assertThat(result.getException()).isPresent();
-        assertThat(result.getException().get()).isInstanceOf(NotEnoughFundsException.class);
+        assertThat(result.getError()).isPresent();
+        assertThat(result.getError().get()).isInstanceOf(NotEnoughFundsException.class);
         assertThat(result.getTransfer().getStatus()).isEqualByComparingTo(FAILED);
         assertBasicTransferAttributes(result.getTransfer());
     }

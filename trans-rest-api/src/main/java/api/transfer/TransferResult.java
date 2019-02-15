@@ -14,9 +14,9 @@ import static java.util.Optional.ofNullable;
 public class TransferResult {
     @NonNull
     private final Transfer transfer;
-    private ApiException exception;
+    private ApiException error;
 
-    public Optional<ApiException> getException() {
-        return ofNullable(this.exception);
+    public Optional<ApiException> getError() {
+        return ofNullable(this.error);
     }
 }
