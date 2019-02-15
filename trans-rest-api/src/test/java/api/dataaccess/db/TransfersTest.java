@@ -1,4 +1,4 @@
-package api.db;
+package api.dataaccess.db;
 
 import api.transfer.Transfer;
 import org.junit.Test;
