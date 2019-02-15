@@ -39,7 +39,7 @@ public class TransferRestControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     public void shouldSuccessfullyTransferTheGivenAmountFromSenderToRecipient() {
-        with().body(buildTestTransfer(new BigDecimal("1500")))
+        with().body(buildTestTransfer(senderAccountNumber, recipientAccountNumber, new BigDecimal("1500")))
                 .when()
                 .post("/api/transfer")
                 .then()
@@ -63,7 +63,7 @@ public class TransferRestControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     public void shouldFindTheRequestedTransfer() {
-        final String transferId = with().body(buildTestTransfer(new BigDecimal("1500")))
+        final String transferId = with().body(buildTestTransfer(senderAccountNumber, recipientAccountNumber, new BigDecimal("1500")))
                 .when()
                 .post("/api/transfer")
                 .then()
@@ -83,7 +83,7 @@ public class TransferRestControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     public void shouldFailToMakeTheTransferDueToInsufficientCreditInSenderAccount() {
-        with().body(buildTestTransfer(new BigDecimal("4500")))
+        with().body(buildTestTransfer(senderAccountNumber, recipientAccountNumber, new BigDecimal("4500")))
                 .when()
                 .post("/api/transfer")
                 .then()
@@ -105,7 +105,43 @@ public class TransferRestControllerIntegrationTest extends BaseIntegrationTest {
                 .body("balance", equalTo(500));
     }
 
-    private TransferRequest buildTestTransfer(final BigDecimal amount) {
+    @Test
+    public void shouldFailToMakeTheTransferDueToNonExistentSenderAccount() {
+        with().body(buildTestTransfer("fakeAccountId", recipientAccountNumber, new BigDecimal("4500")))
+                .when()
+                .post("/api/transfer")
+                .then()
+                .statusCode(400)
+                .assertThat()
+                .body("error", equalTo("Account not found"))
+                .body("transfer.status", equalTo(FAILED.name()));
+
+        get("/api/account/" + recipientAccountNumber)
+                .then()
+                .statusCode(200)
+                .assertThat()
+                .body("balance", equalTo(500));
+    }
+
+    @Test
+    public void shouldFailToMakeTheTransferDueToNonExistentRecipientAccount() {
+        with().body(buildTestTransfer(senderAccountNumber, "fakeAccountId", new BigDecimal("4500")))
+                .when()
+                .post("/api/transfer")
+                .then()
+                .statusCode(400)
+                .assertThat()
+                .body("error", equalTo("Account not found"))
+                .body("transfer.status", equalTo(FAILED.name()));
+
+        get("/api/account/" + senderAccountNumber)
+                .then()
+                .statusCode(200)
+                .assertThat()
+                .body("balance", equalTo(3000));
+    }
+
+    private TransferRequest buildTestTransfer(final String senderAccountNumber, final String recipientAccountNumber, final BigDecimal amount) {
         return new TransferRequest(senderAccountNumber, recipientAccountNumber, amount);
     }
 
